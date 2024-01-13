@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
+import axios from 'axios'
 
 const Register = () => {
 
@@ -9,6 +10,9 @@ const Register = () => {
     password: '',
     password2: ''
   })
+ 
+  const [error,setError] = useState('')
+  const navigate = useNavigate()
 
   const changeInputHandler = (e) => {
     setUserData(prev => {
@@ -18,14 +22,32 @@ const Register = () => {
       }
     })
   }
+ 
+  const registerUser = async(e) => {
+    e.preventDefault()
+    setError('')
 
+    try{
+      const response = await axios.post(`http://localhost:5000/api/users/register`,userData)
+      const newUser = await response.data
+      if(!newUser){
+        setError("Couldn't register user. Please try again")
+      }
+      navigate('/')
+
+    }catch(err){
+
+      setError(err.response.data.message)
+    }
+    
+  } 
 
   return (
     <div className='register'>
       <div className='container'>
         <h2>Sign up</h2>
-        <form className='form register__form'>
-          <p className='form__error-message'>This is an error message</p>
+        <form className='form register__form' onSubmit={registerUser}>
+          {error && <p className='form__error-message'>{error} </p> }
           <input type='text' placeholder='Full Name' name='name' value={userData.name} onChange={changeInputHandler} />
           <input type='text' placeholder='Email' name='email' value={userData.email} onChange={changeInputHandler} />
           <input type='password' placeholder='Password' name='password' value={userData.password} onChange={changeInputHandler} />
