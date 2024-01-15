@@ -1,26 +1,51 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PostItem from '../components/PostItem'
 import {DUMmy_POST} from '../pages/data'
-
+import Loader from './Loader'
+import axios from 'axios'
 
 const Posts = () => {
 
-  const [posts, setPots] = useState(DUMmy_POST)
+  const [posts, setPots] = useState([])
+  const [isLoading,setIsLoading] = useState(false)
+
+  useEffect(() => {
+    const fetchPosts = async() => {
+      setIsLoading(true)
+      try{
+        const response = await axios.get(`http://localhost:5000/api/posts`)
+        setPots(response?.data)
+      }catch(err){
+        console.log(err)
+      }
+      setIsLoading(false)
+    }
+
+    fetchPosts()
+  },[])
+  
+
+  if(isLoading){
+    return <Loader/>
+  }
 
   return (
     <section className='posts'>
-     <div className='container posts__container'>
-     { posts.length > 0 ? posts.map(({id, thumbnail, category, title, desc, authorID}) =>
+      {posts.length > 0 ? <div className='container posts__container'>
+        {
+          posts.map(({_id:id,thumbnail,category,title,description,creator,createdAt}) =>
           <PostItem
             key={id}
             thumbnail={thumbnail}
             category={category}
             title={title}
             postId={id}
-            description={desc}
-            authorID={authorID} />
-        )
-      :<h2 className='center'>No post found</h2>}</div>
+            createdAt={createdAt}
+            description={description}
+            creator={creator} />
+          )
+        }
+      </div>:<h2 className='center'>No posts found</h2>}
     </section>
   )
 }

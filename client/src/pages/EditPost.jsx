@@ -1,6 +1,9 @@
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { useNavigate, useParams } from 'react-router-dom';
+import {UserContext} from '../context/userContext'
+import axios from 'axios';
 
 const EditPost = () => {
 
@@ -8,7 +11,9 @@ const EditPost = () => {
   const [category,setCategory] = useState('Uncategorized')
   const [description,setDescription] = useState('')
   const [thumbnail,setThumbnail] = useState('')
-
+  const [error,setError] = useState('')
+  
+  const navigate = useNavigate()
   const modules = {
     toolbar: [
       [{'header':[1,2,3,4,5,false]}],
@@ -29,17 +34,56 @@ const EditPost = () => {
   const POST_CATEGORIES = [
     'Agriculture','Business','Education','Entertainment','Art','Investment','Uncategorized','Weather'
   ]
+  const {currentUser} = useContext(UserContext)
+  const token = currentUser?.token
+  const {id} = useParams()
+
+  useEffect(() => {
+    if(!token){
+      navigate('/')
+    }
+  },[])
+
+  useEffect(() => {
+    const getPost = async() => {
+      try{
+        const response = await axios.get(`http://localhost:5000/api/posts/${id}`)
+        console.log(response)
+        setTitle(response.data.title)
+        setDescription(response.data.description)
+      }catch(error){
+        console.log(error)
+      }
+    }
+    getPost()
+  },[])
+
+  const editPost = async(e) => {
+    e.preventDefault()
+    const postData = new FormData()
+
+    postData.set("title",title)
+    postData.set("category",category)
+    postData.set("description",description)
+    postData.set("thumbnail",thumbnail)
+
+    try{
+      const response = await axios.patch(`http://localhost:5000/api/posts/${id}`,postData,{withCredentials:true,headers:
+      {Authorization:`Bearer ${token}`}})
+      if(response.status == 200){
+        return navigate('/')
+      }
+    }catch(error){
+      setError(error.response.data.message)
+    }
+  }
 
   return (
-    <section className='create-post'>
+    <section className='create-post' style={{marginTop:'100px'}}>
       <div className='container'>
         <h2>Edit Post</h2>
-
-        <p className='form__error-message'>
-            This is a error message
-        </p>
-
-        <form className='form create-post__form'>
+        {error && <p className='form__error-message'>{error}</p>}
+        <form className='form create-post__form' onSubmit={editPost}>
           <input type='text' placeholder='Title' value={title} onChange={e => setTitle(e.target.value)} autoFocus/> 
           <select name='category' value={category} onChange={e => setCategory(e.target.value)}>
             {

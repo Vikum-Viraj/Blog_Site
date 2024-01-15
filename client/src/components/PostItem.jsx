@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import PostAuthor from '../components/PostAuthor'
 
-const PostItem = ({ postId, category, title, description, authorID, thumbnail }) => {
+const PostItem = ({ postId, category, title, description, creator, thumbnail,createdAt }) => {
 
   const shortDescription = description.length > 145 ? description.substr(0, 145) + '...' : description
   const postTitle = title.length > 30 ? title.substr(0,30) + '...' :title
@@ -10,7 +10,7 @@ const PostItem = ({ postId, category, title, description, authorID, thumbnail })
   return (
     <article className='post'>
       <div className='post__thumbnail'>
-        <img src={thumbnail} alt={title} />
+        <img  src={`http://localhost:5000/uploads/${thumbnail}`} alt={title} />
       </div>
 
       <div className='post__content'>
@@ -19,7 +19,7 @@ const PostItem = ({ postId, category, title, description, authorID, thumbnail })
         </Link>
         <p>{shortDescription}</p>
         <div className='post__footer'>
-          <PostAuthor />
+          <PostAuthor authorID ={creator} createdAt={createdAt} />
           <Link to={`/posts/categories/${category}`} className='btn category'>{category}</Link>
         </div>
       </div>
