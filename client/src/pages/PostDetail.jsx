@@ -16,7 +16,7 @@ const PostDetail = () => {
   const [isLoading, setIsLoading] = useState(false)
 
   const { currentUser } = useContext(UserContext)
-
+  
   useEffect(() => {
 
     const getPost = async() => {
