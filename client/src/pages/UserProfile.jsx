@@ -22,6 +22,7 @@ const UserProfile = () => {
   const {currentUser} = useContext(UserContext)
   const token = currentUser?.token
   
+  //Change the avatar
   const changeAvatarHandler = async() => {
     setIsAvatarTouched(false)
     try{
